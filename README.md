@@ -28,6 +28,13 @@ sudo passwd andrew
 sudo passwd robert
 ```
 
+Add existing user to an existing group
+
+```bash
+sudo usermod -a -G groupName userName
+# alterantively (?)
+sudo adduser userName groupName
+```
 
 ### Python and virtual environment
 
