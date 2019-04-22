@@ -3,8 +3,11 @@
 ## Contents
 
 - [Prerequisites](#yoga-prereq)
+- [Jupyter](#yoga-jupyter)
 - [Docs](#yoga-docs)
 - [Proof of concept](#yoga-proofconcept)
+
+
 
 <a id="yoga-prereq"></a>
 
@@ -108,17 +111,25 @@ To install / reinstall mod_wsgi for python3 use this command:
     sudo apt-get install libapache2-mod-wsgi-py3
 
 
+<a id="yoga-jupyter"></a>
+
+
 ### Jupyter
 
-How to use an existing virtual environment as kernel for your local jupyter notebooks [link][jupyter_venv]
+Create a virtual environment and upgrade pip to a recent version, then install `python3-dev`.
 
     $ python -m venv projectname
     $ source projectname/bin/activate
+    (venv) $ python -m pip install --upgrade pip
+    (venv) $ sudo apt-get install python3-dev
+    (venv) $ python -m pip install jupyter
+
+Now you can set up an existing virtual environment as kernel for your local jupyter notebooks [link][jupyter_venv]
+
     (venv) $ pip install ipykernel
     (venv) $ ipython kernel install --user --name=projectname
 
 [jupyter_venv]: https://anbasile.github.io/programming/2017/06/25/jupyter-venv/
-
 
 
 
