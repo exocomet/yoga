@@ -1,9 +1,20 @@
 from flask import Flask
+from flask import request, render_template
+
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
     return "Hello World!"
+
+@app.route('/register', methods=('GET', 'POST'))
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+    return render_template('register.html')
+
 
 
 if __name__ == '__main__':

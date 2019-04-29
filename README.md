@@ -1,4 +1,4 @@
-# Ye Olde Graph App 🧘
+# Ye Olde Graph App
 
 ## Contents
 
@@ -61,6 +61,32 @@ on Digital Ocean.
 Append public key to the file ~/.ssh/authorized_keys
 
 
+#### Security considerations
+
+There are hundreds of login attempts per hour. Safety measures (link)[https://serverfault.com/questions/244614/is-it-normal-to-get-hundreds-of-break-in-attempts-per-day]
+- move SSH from port 22
+- don't use password login
+- use SSH public keys only
+- disable login for root via SSH (in the file `/etc/ssh/sshd_config` set `PermitRootLogin no` and restart SSH)
+- blacklist: put `DenyUsers user1 user2 user3` in `/etc/ssh/sshd_config`
+- whitelist: put `AllowUsers user1 user2` in `/etc/ssh/sshd_config`,
+
+
+
+#### SSH service
+
+Manage the service with `systemctl` (link)[https://wiki.ubuntuusers.de/systemd/systemctl/].
+Use `start|restart|reload|status|stop|...`
+
+    sudo systemctl start ssh
+    sudo systemctl status ssh
+
+
+#### Copy some files over SSH
+
+    scp userName@hostName:/path/to/file.txt /local/dir
+
+
 ### Fabric
 
 Used for deployment automation. Example fabfile:
@@ -100,6 +126,7 @@ Database connections need their own rules, see the link above.
     sudo service apache2 restart
 
 
+
 ### Apache and mod_wsgi
 
 This is fucking important.
@@ -112,7 +139,6 @@ To install / reinstall mod_wsgi for python3 use this command:
 
 
 <a id="yoga-jupyter"></a>
-
 
 ### Jupyter
 
