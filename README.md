@@ -39,11 +39,22 @@ sudo usermod -a -G groupName userName
 sudo adduser userName groupName
 ```
 
+The user has to logout and login again to apply the changes
+on group membership.
+
+
 ### Python and virtual environment
 
 - Python version - fabric might be picky?
 - Virtual environment - place it to `/usr/local/bin/venv`
  [link](https://unix.stackexchange.com/questions/8656/usr-bin-vs-usr-local-bin-on-linux)
+ For more information on file system hierarchy see `man hier`.
+- setgid - set group id bit
+
+    user@ubuntu:/usr/local/bin$ sudo mkdir venv
+    user@ubuntu:/usr/local/bin$ sudo chgrp developers venv
+    user@ubuntu:/usr/local/bin$ sudo chmod g+sw venv
+
 
 
 ### Git
@@ -142,10 +153,12 @@ To install / reinstall mod_wsgi for python3 use this command:
 
 ### Jupyter
 
-Create a virtual environment and upgrade pip to a recent version, then install `python3-dev`.
+Create a virtual environment, ensure you have pip installed and upgraded
+to a recent version, then install `python3-dev`.
 
     $ python -m venv projectname
     $ source projectname/bin/activate
+    (venv) $ sudo apt-get install python3-pip
     (venv) $ python -m pip install --upgrade pip
     (venv) $ sudo apt-get install python3-dev
     (venv) $ python -m pip install jupyter
