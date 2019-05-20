@@ -51,9 +51,11 @@ on group membership.
  For more information on file system hierarchy see `man hier`.
 - setgid - set group id bit
 
-    user@ubuntu:/usr/local/bin$ sudo mkdir venv
-    user@ubuntu:/usr/local/bin$ sudo chgrp developers venv
-    user@ubuntu:/usr/local/bin$ sudo chmod g+sw venv
+```bash
+user@ubuntu:/usr/local/bin$ sudo mkdir venv
+user@ubuntu:/usr/local/bin$ sudo chgrp developers venv
+user@ubuntu:/usr/local/bin$ sudo chmod g+sw venv
+```
 
 
 
@@ -74,7 +76,7 @@ Append public key to the file ~/.ssh/authorized_keys
 
 #### Security considerations
 
-There are hundreds of login attempts per hour. Safety measures (link)[https://serverfault.com/questions/244614/is-it-normal-to-get-hundreds-of-break-in-attempts-per-day]
+There are hundreds of login attempts per hour. Safety measures [link]([https://serverfault.com/questions/244614/is-it-normal-to-get-hundreds-of-break-in-attempts-per-day)
 - move SSH from port 22
 - don't use password login
 - use SSH public keys only
@@ -86,7 +88,7 @@ There are hundreds of login attempts per hour. Safety measures (link)[https://se
 
 #### SSH service
 
-Manage the service with `systemctl` (link)[https://wiki.ubuntuusers.de/systemd/systemctl/].
+Manage the service with `systemctl` [link](https://wiki.ubuntuusers.de/systemd/systemctl/).
 Use `start|restart|reload|status|stop|...`
 
     sudo systemctl start ssh
@@ -113,7 +115,7 @@ Throws lots of `CryptographyDeprecationWarnings`, see: https://github.com/parami
 
 ### Firewall
 
-Instructions on DO [https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-16-04]
+Instructions on [DO](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-16-04)
 
     sudo apt-get install ufw
     sudo ufw default deny incoming
@@ -176,11 +178,11 @@ Now you can set up an existing virtual environment as kernel for your local jupy
 
 ## Docs
 
-https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-18-04
-https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
-https://modwsgi.readthedocs.io/en/develop/user-guides/virtual-environments.html#virtual-environment-and-python-version
-http://flask.pocoo.org/docs/1.0/deploying/mod_wsgi/
-http://www.fabfile.org/
+- https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-18-04
+- https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
+- https://modwsgi.readthedocs.io/en/develop/user-guides/virtual-environments.html#virtual-environment-and-python-version
+- http://flask.pocoo.org/docs/1.0/deploying/mod_wsgi/
+- http://www.fabfile.org/
 
 
 
@@ -203,6 +205,100 @@ This is only relevant for this working minimal example.
  - /var/www/YogaApp
  - /var/www/YogaApp/YogaApp
  - /var/www/YogaApp/yogaapp.wsgi
- - /var/www/YogaApp/YogaApp/__init__.py
+ - /var/www/YogaApp/YogaApp/\_\_init\_\_.py
  - /var/www/YogaApp/YogaApp/static
 
+
+
+
+## Database
+
+### PostgreSQL
+
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
+
+Install PostgreSQL
+
+    sudo apt install postgresql postgresql-contrib
+
+A new linux user and a new database role account get created, both with the same name **postgres**.
+
+```bash
+sudo -i -u postgres
+psql
+## or
+sudo -u postgres psql
+## \q to quit psql
+```
+
+
+Create a new PostgreSQL user account with `createuser`, which is a wrapper for the SQL command
+`CREATE ROLE`. [doc](https://www.postgresql.org/docs/10/app-createuser.html) Therefore you have to
+specify the SQL role account by the `-u` flag.
+
+```bash
+## quick interactive method to create a role
+sudo -u postgres createuser --interactive
+## password encrypted user accounts can be created as follows
+sudo -u postgres createuser -PE dbtestuser
+```
+
+For **ident** authentication you need a linux user with the same name as of the PostgreSQL role.
+```bash
+sudo adduser dbtestuser
+sudo -u dbtestuser psql -d postgres
+## \conninfo gives connection info on the psql shell
+```
+
+Note: PostgreSQL provides several options for [authentication](https://www.postgresql.org/docs/10/auth-methods.html),
+**ident** seems to be the least secure method?
+
+
+To avoid the creation of additional Linux system users (and Unix sockets which uses **peer** authentication),
+use a local network interface as connection.
+
+Create a database
+```bash
+sudo -u postgres createdb dbname --owner=dbtest --encoding=UTF8
+```
+
+Connect to the database
+```bash
+psql -U dbtest -h 127.0.0.1 -d dbname
+```
+
+
+
+Executing a PostreSQL script (here are some example scripts [link](https://use-the-index-luke.com/sql/example-schema/postgresql/where-clause))
+
+```bash
+psql -U dbtest -h 127.0.0.1 -f script.sql -d dbname
+```
+
+
+Connection to the database from a local Jupyter notebook
+
+```python
+with sshtunnel.SSHTunnelForwarder(
+    ('46.101.128.223', 22),
+    ssh_private_key="C:\\Users\\username\\.ssh\\id_rsa",
+    ssh_username="username",
+    remote_bind_address=('localhost', 5432),
+    local_bind_address=('localhost', 6543), ## some random free port
+) as tunnel:
+    print("server connected, port:", tunnel.local_bind_port)
+    params = {
+        'user': 'dbtest',
+        'password': 'password',
+        'host': tunnel.local_bind_host,
+        'port': tunnel.local_bind_port, ## local_bind_address could be random
+        'database': 'dbname',
+    }
+    conn = psycopg2.connect(**params)
+    curs = conn.cursor()
+    print("database connected")
+
+    curs.execute('select * from tablename')
+    r = curs.fetchall()
+    print(r)
+```
